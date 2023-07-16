@@ -1,54 +1,47 @@
 import 'package:flutter/material.dart';
-import 'package:shop_list_app/models/shopping_item.dart';
-import 'package:shop_list_app/models/shopping_list.dart';
-import 'package:shop_list_app/models/shopping_list_item.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shop_list_app/providers/shopping_provider.dart';
 
 import 'add_item_screen.dart';
 
-class ShoppingListScreen extends StatefulWidget {
-  const ShoppingListScreen({super.key, required this.shoppingList});
+class ShoppingListScreen extends ConsumerStatefulWidget {
+  const ShoppingListScreen({super.key, required this.shoppingListId});
 
-  final ShoppingList shoppingList;
+  final int shoppingListId;
 
   @override
-  State<ShoppingListScreen> createState() => _ShoppingListScreenState();
+  ConsumerState<ShoppingListScreen> createState() => _ShoppingListScreenState();
 }
 
-class _ShoppingListScreenState extends State<ShoppingListScreen> {
-
-  Future<void> _navigateToAddItemScreen() async {
-    final newItem = await Navigator.push<String>(
-      context,
-      MaterialPageRoute(builder: (context) => const AddItemScreen()),
-    );
-
-    if (newItem != null) {
-      setState(() {
-        widget.shoppingList.shoppingListItems.add(
-          ShoppingListItem(
-            shoppingItem: ShoppingItem(name: newItem),
-            isChecked: false,
-          ),
-        );
-      });
-    }
-  }
-
+class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen> {
   @override
   Widget build(BuildContext context) {
+    final shoppingList = ref
+        .watch(shoppingProvider)
+        .firstWhere((list) => list.id == widget.shoppingListId);
+
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton(
-        onPressed: _navigateToAddItemScreen,
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AddItemScreen(
+                shoppingListId: widget.shoppingListId,
+              ),
+            ),
+          );
+        },
         child: const Icon(Icons.add),
       ),
       appBar: AppBar(
-        title: Text(widget.shoppingList.name),
+        title: Text(shoppingList.name),
       ),
       body: ListView.builder(
-        itemCount: widget.shoppingList.shoppingListItems.length,
+        itemCount: shoppingList.shoppingListItems.length,
         itemBuilder: (context, index) {
-          final shoppingListItem = widget.shoppingList.shoppingListItems[index];
+          final shoppingListItem = shoppingList.shoppingListItems[index];
           return ListTile(
             onTap: () {
               setState(() {

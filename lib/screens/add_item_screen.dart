@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shop_list_app/models/shopping_item.dart';
+import 'package:shop_list_app/providers/shopping_provider.dart';
 
-class AddItemScreen extends StatefulWidget {
-  const AddItemScreen({super.key});
+
+class AddItemScreen extends ConsumerStatefulWidget {
+  const AddItemScreen({super.key, required this.shoppingListId});
+
+  final int shoppingListId;
 
   @override
-  State<AddItemScreen> createState() => _AddItemScreenState();
+  ConsumerState<AddItemScreen> createState() => _AddItemScreenState();
 }
 
-class _AddItemScreenState extends State<AddItemScreen> {
+class _AddItemScreenState extends ConsumerState<AddItemScreen> {
   final TextEditingController _textEditingController = TextEditingController();
 
   @override
@@ -29,9 +35,13 @@ class _AddItemScreenState extends State<AddItemScreen> {
             const SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: () {
-                final newItem = _textEditingController.text.trim();
-                if (newItem.isNotEmpty) {
-                  Navigator.pop(context, newItem);
+                final newShoppingItemName = _textEditingController.text.trim();
+                if (newShoppingItemName.isNotEmpty) {
+                  ref.read(shoppingProvider.notifier).addShoppingListItem(
+                    widget.shoppingListId,
+                    ShoppingItem(name: newShoppingItemName)
+                  );
+                  Navigator.pop(context);
                 }
               },
               child: const Text("Add"),

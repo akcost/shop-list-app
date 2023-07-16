@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:shop_list_app/models/shopping_list.dart';
 import 'package:shop_list_app/providers/shopping_provider.dart';
 
 class AddListScreen extends ConsumerStatefulWidget {
@@ -32,13 +31,10 @@ class _AddListScreenState extends ConsumerState<AddListScreen> {
             const SizedBox(height: 16.0),
             ElevatedButton(
               onPressed: () {
-                final newItem = _textEditingController.text.trim();
-                if (newItem.isNotEmpty) {
+                final newListName = _textEditingController.text.trim();
+                if (newListName.isNotEmpty) {
                   ref.read(shoppingProvider.notifier).addShoppingList(
-                    ShoppingList(
-                      name: newItem,
-                      shoppingListItems: [],
-                    ),
+                    newListName
                   );
                   Navigator.pop(context);
                 }

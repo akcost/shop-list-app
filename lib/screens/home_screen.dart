@@ -41,13 +41,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => ShoppingListScreen(
-                    shoppingList: shoppingList,
+                    shoppingListId: shoppingList.id,
                   ),
                 ),
               );
             },
             trailing: IconButton(onPressed: () {
-              ref.read(shoppingProvider.notifier).removeShoppingList(shoppingList.name);
+              ref.read(shoppingProvider.notifier).removeShoppingList(shoppingList.id);
             }, icon: const Icon(Icons.delete_forever)),
             title: Text(shoppingList.name),
           );
