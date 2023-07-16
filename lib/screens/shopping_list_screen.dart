@@ -18,7 +18,7 @@ class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen> {
   Widget build(BuildContext context) {
     final shoppingList = ref
         .watch(shoppingProvider)
-        .firstWhere((list) => list.id == widget.shoppingListId);
+        .firstWhere((list) => list.index == widget.shoppingListId);
 
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -60,7 +60,7 @@ class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen> {
                 onPressed: () {
                   ref
                       .read(shoppingProvider.notifier)
-                      .removeShoppingListItem(shoppingList.id, index);
+                      .removeShoppingListItem(shoppingList.index, index);
                 },
                 icon: const Icon(Icons.delete_forever)),
             title: Text(shoppingListItem.shoppingItem.name),

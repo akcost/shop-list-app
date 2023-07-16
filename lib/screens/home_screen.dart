@@ -12,6 +12,29 @@ class HomeScreen extends ConsumerStatefulWidget {
 }
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
+  var _isLoading = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadItems();
+  }
+
+  void _loadItems() async {
+    try {
+      await ref.read(shoppingProvider.notifier).getAllShoppingLists();
+      setState(() {
+        _isLoading = false;
+      });
+    } catch (err) {
+      setState(() {
+        _isLoading = false;
+        _error = "Something went wrong! Please try again later.";
+      });
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -41,13 +64,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => ShoppingListScreen(
-                    shoppingListId: shoppingList.id,
+                    shoppingListId: shoppingList.index,
                   ),
                 ),
               );
             },
             trailing: IconButton(onPressed: () {
-              ref.read(shoppingProvider.notifier).removeShoppingList(shoppingList.id);
+              ref.read(shoppingProvider.notifier).removeShoppingList(shoppingList.index);
             }, icon: const Icon(Icons.delete_forever)),
             title: Text(shoppingList.name),
           );

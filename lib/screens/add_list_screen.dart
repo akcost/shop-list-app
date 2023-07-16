@@ -33,9 +33,10 @@ class _AddListScreenState extends ConsumerState<AddListScreen> {
               onPressed: () {
                 final newListName = _textEditingController.text.trim();
                 if (newListName.isNotEmpty) {
-                  ref.read(shoppingProvider.notifier).addShoppingList(
-                    newListName
-                  );
+                  // ref.read(shoppingProvider.notifier).addShoppingList(
+                  //   newListName
+                  // );
+                  ref.read(shoppingProvider.notifier).saveShoppingList(newListName);
                   Navigator.pop(context);
                 }
               },
