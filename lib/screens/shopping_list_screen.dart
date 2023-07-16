@@ -28,7 +28,8 @@ class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen> {
             context,
             MaterialPageRoute(
               builder: (context) => AddItemScreen(
-                shoppingListId: widget.shoppingListId,
+                shoppingListId: shoppingList.id,
+                shoppingListIndex: shoppingList.index,
               ),
             ),
           );

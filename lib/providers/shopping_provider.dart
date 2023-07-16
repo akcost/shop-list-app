@@ -93,6 +93,50 @@ class ShoppingNotifier extends StateNotifier<List<ShoppingList>> {
     }
   }
 
+  Future<void> saveShoppingListItem(String shoppingListId, String name, int shoppingListIndex) async {
+    try {
+      final url = Uri.https(
+          databaseUrl,
+          'shopping-lists/$shoppingListId/items.json');
+      final response = await http.post(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(
+          {
+            'name': name,
+            'isChecked': false,
+          },
+        ),
+      );
+      if (response.statusCode >= 400) {
+        throw Exception("Failed to fetch data please try again later.");
+      }
+
+      final Map<String, dynamic> resData = jsonDecode(response.body);
+
+      final shoppingList = state[shoppingListIndex];
+      final updatedList = ShoppingList(
+        id: shoppingList.id,
+        index: shoppingListIndex,
+        name: shoppingList.name,
+        shoppingListItems: [
+          ...shoppingList.shoppingListItems,
+          ShoppingListItem(shoppingItem: ShoppingItem(name: name), isChecked: false),
+        ],
+      );
+
+      state = [
+        ...state.sublist(0, shoppingListIndex),
+        updatedList,
+        ...state.sublist(shoppingListIndex + 1),
+      ];
+    } on Exception catch (e) {
+      throw (Exception(e));
+    }
+  }
+
   Future<void> saveShoppingList(String newListName) async {
     try {
       final url = Uri.https(databaseUrl, 'shopping-lists.json');
