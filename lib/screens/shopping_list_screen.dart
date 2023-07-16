@@ -19,7 +19,7 @@ class _ShoppingListScreenState extends State<ShoppingListScreen> {
   Future<void> _navigateToAddItemScreen() async {
     final newItem = await Navigator.push<String>(
       context,
-      MaterialPageRoute(builder: (context) => const AddItem()),
+      MaterialPageRoute(builder: (context) => const AddItemScreen()),
     );
 
     if (newItem != null) {

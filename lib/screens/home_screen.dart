@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:shop_list_app/models/shopping_item.dart';
 import 'package:shop_list_app/models/shopping_list.dart';
 import 'package:shop_list_app/models/shopping_list_item.dart';
+import 'package:shop_list_app/screens/add_list_screen.dart';
 import 'package:shop_list_app/screens/shopping_list_screen.dart';
-
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -41,12 +41,25 @@ class _HomeScreenState extends State<HomeScreen> {
     )
   ];
 
+  Future<void> _navigateToAddListScreen() async {
+    final newItem = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(builder: (context) => const AddListScreen()),
+    );
+
+    if (newItem != null) {
+      setState(() {
+        shoppingLists.add(ShoppingList(name: newItem, shoppingListItems: []));
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: _navigateToAddListScreen,
         child: const Icon(Icons.add),
       ),
       appBar: AppBar(

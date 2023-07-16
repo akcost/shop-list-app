@@ -1,20 +1,20 @@
 import 'package:flutter/material.dart';
 
-class AddItemScreen extends StatefulWidget {
-  const AddItemScreen({super.key});
+class AddListScreen extends StatefulWidget {
+  const AddListScreen({super.key});
 
   @override
-  State<AddItemScreen> createState() => _AddItemScreenState();
+  State<AddListScreen> createState() => _AddListScreenState();
 }
 
-class _AddItemScreenState extends State<AddItemScreen> {
+class _AddListScreenState extends State<AddListScreen> {
   final TextEditingController _textEditingController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Add Item"),
+        title: const Text("Create New List"),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -23,7 +23,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
             TextField(
               controller: _textEditingController,
               decoration: const InputDecoration(
-                labelText: "Item Name",
+                labelText: "List Name",
               ),
             ),
             const SizedBox(height: 16.0),
@@ -34,7 +34,7 @@ class _AddItemScreenState extends State<AddItemScreen> {
                   Navigator.pop(context, newItem);
                 }
               },
-              child: const Text("Add"),
+              child: const Text("Create"),
             ),
           ],
         ),
