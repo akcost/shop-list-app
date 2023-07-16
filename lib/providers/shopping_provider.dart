@@ -13,7 +13,7 @@ class ShoppingNotifier extends StateNotifier<List<ShoppingList>> {
         id: state.length,
         name: newListName,
         shoppingListItems: [],
-      )
+      ),
     ];
   }
 
@@ -38,11 +38,30 @@ class ShoppingNotifier extends StateNotifier<List<ShoppingList>> {
         ...state.sublist(shoppingListId + 1),
       ];
     }
-
   }
 
-  void removeShoppingList(int shoppingListId) async {
+  void removeShoppingList(int shoppingListId) {
     state = state.where((item) => item.id != shoppingListId).toList();
+  }
+
+  void removeShoppingListItem(int shoppingListId, int itemIndex) {
+    if (shoppingListId >= 0 && shoppingListId < state.length) {
+      final shoppingList = state[shoppingListId];
+      final updatedItems = List<ShoppingListItem>.from(shoppingList.shoppingListItems);
+      if (itemIndex >= 0 && itemIndex < updatedItems.length) {
+        updatedItems.removeAt(itemIndex);
+        final updatedList = ShoppingList(
+          id: shoppingList.id,
+          name: shoppingList.name,
+          shoppingListItems: updatedItems,
+        );
+        state = [
+          ...state.sublist(0, shoppingListId),
+          updatedList,
+          ...state.sublist(shoppingListId + 1),
+        ];
+      }
+    }
   }
 }
 

@@ -56,6 +56,13 @@ class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen> {
                 });
               },
             ),
+            trailing: IconButton(
+                onPressed: () {
+                  ref
+                      .read(shoppingProvider.notifier)
+                      .removeShoppingListItem(shoppingList.id, index);
+                },
+                icon: const Icon(Icons.delete_forever)),
             title: Text(shoppingListItem.shoppingItem.name),
           );
         },
