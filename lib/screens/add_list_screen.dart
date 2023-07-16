@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shop_list_app/models/shopping_list.dart';
+import 'package:shop_list_app/providers/shopping_provider.dart';
 
-class AddListScreen extends StatefulWidget {
+class AddListScreen extends ConsumerStatefulWidget {
   const AddListScreen({super.key});
 
   @override
-  State<AddListScreen> createState() => _AddListScreenState();
+  ConsumerState<AddListScreen> createState() => _AddListScreenState();
 }
 
-class _AddListScreenState extends State<AddListScreen> {
+class _AddListScreenState extends ConsumerState<AddListScreen> {
   final TextEditingController _textEditingController = TextEditingController();
 
   @override
@@ -31,7 +34,13 @@ class _AddListScreenState extends State<AddListScreen> {
               onPressed: () {
                 final newItem = _textEditingController.text.trim();
                 if (newItem.isNotEmpty) {
-                  Navigator.pop(context, newItem);
+                  ref.read(shoppingProvider.notifier).addShoppingList(
+                    ShoppingList(
+                      name: newItem,
+                      shoppingListItems: [],
+                    ),
+                  );
+                  Navigator.pop(context);
                 }
               },
               child: const Text("Create"),
