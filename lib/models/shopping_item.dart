@@ -1,5 +1,5 @@
-class GroceryItem {
-  const GroceryItem({
+class ShoppingItem {
+  const ShoppingItem({
     required this.name,
   });
 
