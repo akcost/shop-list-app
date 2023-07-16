@@ -15,7 +15,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final shoppingListsNew = ref.watch(shoppingProvider);
+    final shoppingLists = ref.watch(shoppingProvider);
 
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -32,9 +32,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         title: const Text("Shopping List"),
       ),
       body: ListView.builder(
-        itemCount: shoppingListsNew.length,
+        itemCount: shoppingLists.length,
         itemBuilder: (context, index) {
-          final shoppingList = shoppingListsNew[index];
+          final shoppingList = shoppingLists[index];
           return ListTile(
             onTap: () {
               Navigator.push(
@@ -46,6 +46,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               );
             },
+            trailing: IconButton(onPressed: () {
+              ref.read(shoppingProvider.notifier).removeShoppingList(shoppingList.name);
+            }, icon: const Icon(Icons.delete_forever)),
             title: Text(shoppingList.name),
           );
         },

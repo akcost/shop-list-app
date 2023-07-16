@@ -7,6 +7,10 @@ class ShoppingNotifier extends StateNotifier<List<ShoppingList>> {
   void addShoppingList(ShoppingList shoppingList) {
     state = [...state, shoppingList];
   }
+
+  void removeShoppingList(String name) async {
+    state = state.where((item) => item.name != name).toList();
+  }
 }
 
 final shoppingProvider = StateNotifierProvider<ShoppingNotifier, List<ShoppingList>>((ref) {
