@@ -7,43 +7,18 @@ import 'package:shop_list_app/models/shopping_list_item.dart';
 import 'package:shop_list_app/config.dart';
 import 'package:http/http.dart' as http;
 
-class ShoppingNotifier extends StateNotifier<List<ShoppingList>> {
-  ShoppingNotifier() : super([]);
+class ShoppingNotifier extends StateNotifier<Map<String, ShoppingList>> {
+  ShoppingNotifier() : super({});
 
   void addShoppingList(String newListName) {
-    state = [
+    state = {
       ...state,
-      ShoppingList(
+      newListName: ShoppingList(
         id: "",
-        index: state.length,
         name: newListName,
-        shoppingListItems: [],
+        shoppingListItemsMap: {},
       ),
-    ];
-  }
-
-  void addShoppingListItem(int shoppingListId, ShoppingItem shoppingItem) {
-    if (shoppingListId >= 0 && shoppingListId < state.length) {
-      ShoppingListItem shoppingListItem =
-          ShoppingListItem(shoppingItem: shoppingItem, isChecked: false);
-
-      final shoppingList = state[shoppingListId];
-      final updatedList = ShoppingList(
-        id: shoppingList.id,
-        index: shoppingListId,
-        name: shoppingList.name,
-        shoppingListItems: [
-          ...shoppingList.shoppingListItems,
-          shoppingListItem,
-        ],
-      );
-
-      state = [
-        ...state.sublist(0, shoppingListId),
-        updatedList,
-        ...state.sublist(shoppingListId + 1),
-      ];
-    }
+    };
   }
 
   Future<void> getAllShoppingLists() async {
@@ -53,7 +28,7 @@ class ShoppingNotifier extends StateNotifier<List<ShoppingList>> {
       final response = await http.get(url);
 
       if (response.statusCode >= 400) {
-        throw Exception("Failed to fetch data please try again later.");
+        throw Exception("Failed to fetch data, please try again later.");
       }
 
       if (response.body == "null") {
@@ -62,42 +37,46 @@ class ShoppingNotifier extends StateNotifier<List<ShoppingList>> {
 
       final Map<String, dynamic> listData = jsonDecode(response.body);
       final List<ShoppingList> shoppingLists = [];
+      final Map<String, ShoppingList> shoppingListsMap = {};
 
       for (final item in listData.entries) {
-
-        ShoppingList shoppingList = ShoppingList(
-            id: item.key,
-            index: item.value["index"],
-            name: item.value["name"],
-            shoppingListItems: []);
+        final shoppingList = ShoppingList(
+          id: item.key,
+          name: item.value["name"],
+          shoppingListItemsMap: {},
+        );
 
         if (item.value["items"] != null) {
-          for (final shopItem in item.value["items"]) {
-            ShoppingListItem shoppingListItem = ShoppingListItem(
-              shoppingItem: ShoppingItem(
-                name: shopItem["name"],
-              ),
-              isChecked: shopItem["isChecked"],
+          for (final entry in item.value["items"].entries) {
+            final itemKey = entry.key;
+            final itemValue = entry.value;
+
+            final shoppingListItem = ShoppingListItem(
+              id: itemKey,
+              shoppingItem: ShoppingItem(name: itemValue["name"]),
+              isChecked: itemValue["isChecked"],
             );
-            shopItem["name"];
-            shopItem["isChecked"];
-            shoppingList.shoppingListItems.add(shoppingListItem);
+
+            shoppingList.shoppingListItemsMap[shoppingListItem.id] =
+                shoppingListItem;
           }
         }
+
+        shoppingListsMap[shoppingList.id] = shoppingList;
         shoppingLists.add(shoppingList);
       }
 
-      state = shoppingLists;
+      state = shoppingListsMap;
     } catch (err) {
       throw Exception(err);
     }
   }
 
-  Future<void> saveShoppingListItem(String shoppingListId, String name, int shoppingListIndex) async {
+  Future<void> saveShoppingListItem(
+      String shoppingListId, String name) async {
     try {
-      final url = Uri.https(
-          databaseUrl,
-          'shopping-lists/$shoppingListId/items.json');
+      final url =
+          Uri.https(databaseUrl, 'shopping-lists/$shoppingListId/items.json');
       final response = await http.post(
         url,
         headers: {
@@ -116,25 +95,54 @@ class ShoppingNotifier extends StateNotifier<List<ShoppingList>> {
 
       final Map<String, dynamic> resData = jsonDecode(response.body);
 
-      final shoppingList = state[shoppingListIndex];
+      final shoppingList = state[shoppingListId];
+
       final updatedList = ShoppingList(
-        id: shoppingList.id,
-        index: shoppingListIndex,
+        id: shoppingList!.id,
         name: shoppingList.name,
-        shoppingListItems: [
-          ...shoppingList.shoppingListItems,
-          ShoppingListItem(shoppingItem: ShoppingItem(name: name), isChecked: false),
-        ],
+        shoppingListItemsMap: {
+          ...shoppingList.shoppingListItemsMap,
+          resData["name"]: ShoppingListItem(
+            id: resData["name"],
+            shoppingItem: ShoppingItem(name: name),
+            isChecked: false,
+          )
+        },
       );
 
-      state = [
-        ...state.sublist(0, shoppingListIndex),
-        updatedList,
-        ...state.sublist(shoppingListIndex + 1),
-      ];
+      state = {
+        ...state,
+        shoppingListId: updatedList,
+      };
     } on Exception catch (e) {
       throw (Exception(e));
     }
+  }
+
+  Future<void> removeShoppingListItem(
+      String shoppingListId, String shoppingListItemId) async {
+    final url = Uri.https(databaseUrl,
+        'shopping-lists/$shoppingListId/items/$shoppingListItemId.json');
+
+    final response = await http.delete(url);
+    if (response.statusCode >= 400) {
+      throw Exception("Failed to fetch data please try again later.");
+    }
+    ShoppingList shoppingList = state[shoppingListId]!;
+
+    final updatedItemsMap =
+    Map<String, ShoppingListItem>.from(shoppingList.shoppingListItemsMap);
+    updatedItemsMap.remove(shoppingListItemId);
+    final updatedList = ShoppingList(
+      id: shoppingList.id,
+      name: shoppingList.name,
+      shoppingListItemsMap: updatedItemsMap,
+    );
+
+    state = {
+      ...state,
+      shoppingListId: updatedList,
+    };
   }
 
   Future<void> saveShoppingList(String newListName) async {
@@ -159,15 +167,14 @@ class ShoppingNotifier extends StateNotifier<List<ShoppingList>> {
 
       final Map<String, dynamic> resData = jsonDecode(response.body);
 
-      state = [
+      state = {
         ...state,
-        ShoppingList(
+        resData["name"]: ShoppingList(
           id: resData["name"],
-          index: state.length,
           name: newListName,
-          shoppingListItems: [],
+          shoppingListItemsMap: {},
         ),
-      ];
+      };
     } on Exception catch (e) {
       throw (Exception(e));
     }
@@ -175,37 +182,23 @@ class ShoppingNotifier extends StateNotifier<List<ShoppingList>> {
     await getAllShoppingLists();
   }
 
-  void removeShoppingList(int shoppingListId) {
-    state = state.where((item) => item.index != shoppingListId).toList();
+  Future<void> removeShoppingList(String shoppingListId) async {
+    final url = Uri.https(databaseUrl, 'shopping-lists/$shoppingListId.json');
+
+    final response = await http.delete(url);
+    if (response.statusCode >= 400) {
+      throw Exception("Failed to remove shopping list, please try again later.");
+    }
+
+    final updatedState = Map<String, ShoppingList>.from(state);
+    updatedState.remove(shoppingListId);
+    state = updatedState;
   }
 
-  void removeShoppingListItem(int shoppingListIndex, int itemIndex) {
-    if (shoppingListIndex >= 0 && shoppingListIndex < state.length) {
-      final shoppingList = state[shoppingListIndex];
-      final updatedItems =
-          List<ShoppingListItem>.from(shoppingList.shoppingListItems);
-      if (itemIndex >= 0 && itemIndex < updatedItems.length) {
-        updatedItems.removeAt(itemIndex);
-        final updatedList = ShoppingList(
-          id: shoppingList.id,
-          index: shoppingList.index,
-          name: shoppingList.name,
-          shoppingListItems: updatedItems,
-        );
-        state = [
-          ...state.sublist(0, shoppingListIndex),
-          updatedList,
-          ...state.sublist(shoppingListIndex + 1),
-        ];
-      }
-    }
-  }
 }
 
 final shoppingProvider =
-    StateNotifierProvider<ShoppingNotifier, List<ShoppingList>>((ref) {
+    StateNotifierProvider<ShoppingNotifier, Map<String, ShoppingList>>((ref) {
   final notifier = ShoppingNotifier();
-  // notifier.addShoppingList("My shopping list");
-  // notifier.addShoppingList("Birthday party list");
   return notifier;
 });

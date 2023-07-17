@@ -7,7 +7,7 @@ import 'add_item_screen.dart';
 class ShoppingListScreen extends ConsumerStatefulWidget {
   const ShoppingListScreen({super.key, required this.shoppingListId});
 
-  final int shoppingListId;
+  final String shoppingListId;
 
   @override
   ConsumerState<ShoppingListScreen> createState() => _ShoppingListScreenState();
@@ -16,9 +16,9 @@ class ShoppingListScreen extends ConsumerStatefulWidget {
 class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen> {
   @override
   Widget build(BuildContext context) {
-    final shoppingList = ref
-        .watch(shoppingProvider)
-        .firstWhere((list) => list.index == widget.shoppingListId);
+
+    final shoppingList = ref.watch(shoppingProvider)[widget.shoppingListId];
+    final shopList = shoppingList!.shoppingListItemsMap.values.toList();
 
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -29,7 +29,6 @@ class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen> {
             MaterialPageRoute(
               builder: (context) => AddItemScreen(
                 shoppingListId: shoppingList.id,
-                shoppingListIndex: shoppingList.index,
               ),
             ),
           );
@@ -40,9 +39,9 @@ class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen> {
         title: Text(shoppingList.name),
       ),
       body: ListView.builder(
-        itemCount: shoppingList.shoppingListItems.length,
+        itemCount: shoppingList.shoppingListItemsMap.length,
         itemBuilder: (context, index) {
-          final shoppingListItem = shoppingList.shoppingListItems[index];
+          final shoppingListItem = shopList[index];
           return ListTile(
             onTap: () {
               setState(() {
@@ -61,7 +60,7 @@ class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen> {
                 onPressed: () {
                   ref
                       .read(shoppingProvider.notifier)
-                      .removeShoppingListItem(shoppingList.index, index);
+                      .removeShoppingListItem(shoppingList.id, shoppingListItem.id);
                 },
                 icon: const Icon(Icons.delete_forever)),
             title: Text(shoppingListItem.shoppingItem.name),
