@@ -21,6 +21,14 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
     _focusNode.requestFocus();
   }
 
+  void _addItem(String newShoppingItemName) {
+    if (newShoppingItemName.isNotEmpty) {
+      ref.read(shoppingProvider.notifier).saveShoppingListItem(
+          widget.shoppingListId, newShoppingItemName);
+      Navigator.pop(context);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -51,12 +59,7 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
                 ),
               ),
               onPressed: () {
-                final newShoppingItemName = _textEditingController.text.trim();
-                if (newShoppingItemName.isNotEmpty) {
-                  ref.read(shoppingProvider.notifier).saveShoppingListItem(
-                      widget.shoppingListId, newShoppingItemName);
-                  Navigator.pop(context);
-                }
+                _addItem(_textEditingController.text.trim());
               },
               child: const Text(
                 "Add",
@@ -68,6 +71,8 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
       ),
     );
   }
+
+
 
   @override
   void dispose() {

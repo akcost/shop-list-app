@@ -19,6 +19,13 @@ class _AddListScreenState extends ConsumerState<AddListScreen> {
     _focusNode.requestFocus();
   }
 
+  void _addList(String newListName) {
+    if (newListName.isNotEmpty) {
+      ref.read(shoppingProvider.notifier).saveShoppingList(newListName);
+      Navigator.pop(context);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -49,11 +56,7 @@ class _AddListScreenState extends ConsumerState<AddListScreen> {
                 ),
               ),
               onPressed: () {
-                final newListName = _textEditingController.text.trim();
-                if (newListName.isNotEmpty) {
-                  ref.read(shoppingProvider.notifier).saveShoppingList(newListName);
-                  Navigator.pop(context);
-                }
+                _addList(_textEditingController.text.trim());
               },
               child: const Text("Create"),
             ),
