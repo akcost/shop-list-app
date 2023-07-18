@@ -107,59 +107,67 @@ class ShoppingNotifier extends StateNotifier<Map<String, ShoppingList>> {
 
   Future<void> toggleCheckShoppingListItem(String shoppingListId,
       ShoppingListItem shoppingListItem) async {
-    final url = Uri.https(databaseUrl,
-        'shopping-lists/$shoppingListId/items/${shoppingListItem
-            .id}.json');
+    try {
+      final url = Uri.https(databaseUrl,
+          'shopping-lists/$shoppingListId/items/${shoppingListItem
+              .id}.json');
 
-    final response = await http.put(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-      'name': shoppingListItem.shoppingItem.name,
-      'isChecked': !shoppingListItem.isChecked,
-      }),
-    );
+      final response = await http.put(
+        url,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+        'name': shoppingListItem.shoppingItem.name,
+        'isChecked': !shoppingListItem.isChecked,
+        }),
+      );
 
-    if (response.statusCode >= 400) {
-      throw Exception("Failed to fetch data please try again later.");
+      if (response.statusCode >= 400) {
+        throw Exception("Failed to fetch data please try again later.");
+      }
+      ShoppingList shoppingList = state[shoppingListId]!;
+      shoppingList.shoppingListItemsMap[shoppingListItem.id]!.isChecked =
+      !shoppingList.shoppingListItemsMap[shoppingListItem.id]!.isChecked;
+
+      state = {
+        ...state,
+        shoppingListId: shoppingList,
+      };
+    } on Exception catch (e) {
+      throw (Exception(e));
     }
-    ShoppingList shoppingList = state[shoppingListId]!;
-    shoppingList.shoppingListItemsMap[shoppingListItem.id]!.isChecked =
-    !shoppingList.shoppingListItemsMap[shoppingListItem.id]!.isChecked;
-
-    state = {
-      ...state,
-      shoppingListId: shoppingList,
-    };
   }
 
 
   Future<void> removeShoppingListItem(String shoppingListId,
       String shoppingListItemId) async {
-    final url = Uri.https(databaseUrl,
-        'shopping-lists/$shoppingListId/items/$shoppingListItemId.json');
+    try {
+      final url = Uri.https(databaseUrl,
+          'shopping-lists/$shoppingListId/items/$shoppingListItemId.json');
 
-    final response = await http.delete(url);
-    if (response.statusCode >= 400) {
-      throw Exception("Failed to fetch data please try again later.");
+      final response = await http.delete(url);
+      if (response.statusCode >= 400) {
+        throw Exception("Failed to fetch data please try again later.");
+      }
+      ShoppingList shoppingList = state[shoppingListId]!;
+
+      final updatedItemsMap =
+      Map<String, ShoppingListItem>.from(shoppingList.shoppingListItemsMap);
+      updatedItemsMap.remove(shoppingListItemId);
+      final updatedList = ShoppingList(
+        id: shoppingList.id,
+        name: shoppingList.name,
+        shoppingListItemsMap: updatedItemsMap,
+      );
+
+      state = {
+        ...state,
+        shoppingListId: updatedList,
+      };
+    } on Exception catch (e) {
+      throw (Exception(e));
     }
-    ShoppingList shoppingList = state[shoppingListId]!;
-
-    final updatedItemsMap =
-    Map<String, ShoppingListItem>.from(shoppingList.shoppingListItemsMap);
-    updatedItemsMap.remove(shoppingListItemId);
-    final updatedList = ShoppingList(
-      id: shoppingList.id,
-      name: shoppingList.name,
-      shoppingListItemsMap: updatedItemsMap,
-    );
-
-    state = {
-      ...state,
-      shoppingListId: updatedList,
-    };
   }
 
   Future<void> saveShoppingList(String newListName) async {
@@ -199,17 +207,21 @@ class ShoppingNotifier extends StateNotifier<Map<String, ShoppingList>> {
   }
 
   Future<void> removeShoppingList(String shoppingListId) async {
-    final url = Uri.https(databaseUrl, 'shopping-lists/$shoppingListId.json');
+    try {
+      final url = Uri.https(databaseUrl, 'shopping-lists/$shoppingListId.json');
 
-    final response = await http.delete(url);
-    if (response.statusCode >= 400) {
-      throw Exception(
-          "Failed to remove shopping list, please try again later.");
+      final response = await http.delete(url);
+      if (response.statusCode >= 400) {
+        throw Exception(
+            "Failed to remove shopping list, please try again later.");
+      }
+
+      final updatedState = Map<String, ShoppingList>.from(state);
+      updatedState.remove(shoppingListId);
+      state = updatedState;
+    } on Exception catch (e) {
+      throw (Exception(e));
     }
-
-    final updatedState = Map<String, ShoppingList>.from(state);
-    updatedState.remove(shoppingListId);
-    state = updatedState;
   }
 
 }
