@@ -22,7 +22,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     _loadItems();
   }
 
-  int getCheckedItemCount(ShoppingList shoppingList) {
+  int _getCheckedItemCount(ShoppingList shoppingList) {
     int count = 0;
     shoppingList.shoppingListItemsMap.values.forEach((item) {
       if (item.isChecked) {
@@ -51,26 +51,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final shoppingLists = ref.watch(shoppingProvider);
     final shopLists = shoppingLists.values.toList();
 
-    return Scaffold(
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const AddListScreen()),
-          );
-        },
-        child: const Icon(Icons.add),
-      ),
-      appBar: AppBar(
-        title: const Text("Shopping List"),
-      ),
-      body: ListView.builder(
+    Widget content = const Center(
+      child: Text("No lists added yet."),
+    );
+
+    if (_isLoading) {
+      content = const Center(
+        child: CircularProgressIndicator(),
+      );
+    }
+
+    if (shopLists.isNotEmpty) {
+      content = ListView.builder(
         itemCount: shoppingLists.length,
         itemBuilder: (context, index) {
           final shoppingList = shopLists[index];
 
-          int checkedItemCount = getCheckedItemCount(shoppingList);
+          int checkedItemCount = _getCheckedItemCount(shoppingList);
           return Dismissible(
             direction: DismissDirection.endToStart,
             background: Container(
@@ -100,9 +97,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ShoppingListScreen(
-                        shoppingListId: shoppingList.id,
-                      ),
+                      builder: (context) =>
+                          ShoppingListScreen(
+                            shoppingListId: shoppingList.id,
+                          ),
                     ),
                   );
                 },
@@ -116,7 +114,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                     ),
                     Text(
-                      "$checkedItemCount/${shoppingList.shoppingListItemsMap.length}",
+                      "$checkedItemCount/${shoppingList.shoppingListItemsMap
+                          .length}",
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -128,13 +127,35 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   color: Colors.green,
                   backgroundColor: Colors.grey,
                   value: checkedItemCount /
-                              (shoppingList.shoppingListItemsMap.isNotEmpty
-                      ? shoppingList.shoppingListItemsMap.length.toDouble()
-                      : 1),
+                      (shoppingList.shoppingListItemsMap.isNotEmpty
+                          ? shoppingList.shoppingListItemsMap.length.toDouble()
+                          : 1),
                 )),
           );
         },
-      ),
-    );
+      );
+    }
+
+    if (_error != null) {
+      content = Center(
+        child: Text(_error!),
+      );
+    }
+
+    return Scaffold(
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const AddListScreen()),
+            );
+          },
+          child: const Icon(Icons.add),
+        ),
+        appBar: AppBar(
+          title: const Text("Shopping List"),
+        ),
+        body: content);
   }
 }

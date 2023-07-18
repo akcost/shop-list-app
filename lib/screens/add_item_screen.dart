@@ -21,7 +21,7 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
         title: const Text("Add Item"),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.fromLTRB(16,16,16,32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

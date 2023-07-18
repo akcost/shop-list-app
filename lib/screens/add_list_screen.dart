@@ -19,7 +19,7 @@ class _AddListScreenState extends ConsumerState<AddListScreen> {
         title: const Text("Create New List"),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(24.0),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
