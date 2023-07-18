@@ -13,6 +13,13 @@ class AddItemScreen extends ConsumerStatefulWidget {
 
 class _AddItemScreenState extends ConsumerState<AddItemScreen> {
   final TextEditingController _textEditingController = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.requestFocus();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +33,7 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             TextField(
+              focusNode: _focusNode,
               autocorrect: false,
               controller: _textEditingController,
               decoration: const InputDecoration(
@@ -64,6 +72,7 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
   @override
   void dispose() {
     _textEditingController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 }

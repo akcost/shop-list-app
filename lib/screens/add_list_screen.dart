@@ -11,6 +11,13 @@ class AddListScreen extends ConsumerStatefulWidget {
 
 class _AddListScreenState extends ConsumerState<AddListScreen> {
   final TextEditingController _textEditingController = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    _focusNode.requestFocus();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,6 +31,7 @@ class _AddListScreenState extends ConsumerState<AddListScreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             TextField(
+              focusNode: _focusNode,
               autocorrect: false,
               controller: _textEditingController,
               decoration: const InputDecoration(
@@ -43,9 +51,6 @@ class _AddListScreenState extends ConsumerState<AddListScreen> {
               onPressed: () {
                 final newListName = _textEditingController.text.trim();
                 if (newListName.isNotEmpty) {
-                  // ref.read(shoppingProvider.notifier).addShoppingList(
-                  //   newListName
-                  // );
                   ref.read(shoppingProvider.notifier).saveShoppingList(newListName);
                   Navigator.pop(context);
                 }
@@ -61,6 +66,7 @@ class _AddListScreenState extends ConsumerState<AddListScreen> {
   @override
   void dispose() {
     _textEditingController.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 }

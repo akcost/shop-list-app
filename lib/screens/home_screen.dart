@@ -107,15 +107,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 title: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      shoppingList.name,
-                      style: const TextStyle(
-                        fontSize: 24,
+                    Expanded(
+                      child: Text(
+                        shoppingList.name,
+                        style: const TextStyle(
+                          fontSize: 20,
+                        ),
                       ),
                     ),
                     Text(
-                      "$checkedItemCount/${shoppingList.shoppingListItemsMap
-                          .length}",
+                      "$checkedItemCount/${shoppingList.shoppingListItemsMap.length}",
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -154,7 +155,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: const Icon(Icons.add),
         ),
         appBar: AppBar(
-          title: const Text("Shopping List"),
+          centerTitle: true,
+          title: const Text("My Lists"),
         ),
         body: content);
   }
