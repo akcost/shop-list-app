@@ -16,7 +16,6 @@ class ShoppingListScreen extends ConsumerStatefulWidget {
 class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen> {
   @override
   Widget build(BuildContext context) {
-
     final shoppingList = ref.watch(shoppingProvider)[widget.shoppingListId];
     final shopList = shoppingList!.shoppingListItemsMap.values.toList();
 
@@ -43,27 +42,23 @@ class _ShoppingListScreenState extends ConsumerState<ShoppingListScreen> {
         itemBuilder: (context, index) {
           final shoppingListItem = shopList[index];
           return ListTile(
-            onTap: () {
-              setState(() {
-                shoppingListItem.isChecked = !shoppingListItem.isChecked;
-              });
-            },
             leading: Checkbox(
+              activeColor: Colors.green,
               value: shoppingListItem.isChecked,
               onChanged: (value) {
-                setState(() {
-                  shoppingListItem.isChecked = value ?? false;
-                });
+                ref.read(shoppingProvider.notifier).toggleCheckShoppingListItem(
+                      widget.shoppingListId,
+                      shoppingListItem,
+                    );
               },
             ),
             trailing: IconButton(
                 onPressed: () {
-                  ref
-                      .read(shoppingProvider.notifier)
-                      .removeShoppingListItem(shoppingList.id, shoppingListItem.id);
+                  ref.read(shoppingProvider.notifier).removeShoppingListItem(
+                      shoppingList.id, shoppingListItem.id);
                 },
-                icon: const Icon(Icons.delete_forever)),
-            title: Text(shoppingListItem.shoppingItem.name),
+                icon: const Icon(Icons.delete_forever,)),
+            title: Text(shoppingListItem.shoppingItem.name, style: TextStyle(fontSize: 20),),
           );
         },
       ),

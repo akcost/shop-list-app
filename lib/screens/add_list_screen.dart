@@ -19,17 +19,27 @@ class _AddListScreenState extends ConsumerState<AddListScreen> {
         title: const Text("Create New List"),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(24.0),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             TextField(
+              autocorrect: false,
               controller: _textEditingController,
               decoration: const InputDecoration(
                 labelText: "List Name",
               ),
             ),
-            const SizedBox(height: 16.0),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                shape: const StadiumBorder(),
+                padding: const EdgeInsets.only(
+                  left: 30,
+                  right: 30,
+                  top: 10,
+                  bottom: 10,
+                ),
+              ),
               onPressed: () {
                 final newListName = _textEditingController.text.trim();
                 if (newListName.isNotEmpty) {

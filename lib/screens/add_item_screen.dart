@@ -21,28 +21,39 @@ class _AddItemScreenState extends ConsumerState<AddItemScreen> {
         title: const Text("Add Item"),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(24.0),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             TextField(
+              autocorrect: false,
               controller: _textEditingController,
               decoration: const InputDecoration(
-                labelText: "Item Name",
+                labelText: "Name",
               ),
             ),
-            const SizedBox(height: 16.0),
             ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                shape: const StadiumBorder(),
+                padding: const EdgeInsets.only(
+                  left: 30,
+                  right: 30,
+                  top: 10,
+                  bottom: 10,
+                ),
+              ),
               onPressed: () {
                 final newShoppingItemName = _textEditingController.text.trim();
                 if (newShoppingItemName.isNotEmpty) {
                   ref.read(shoppingProvider.notifier).saveShoppingListItem(
-                        widget.shoppingListId,
-                        newShoppingItemName
-                      );
+                      widget.shoppingListId, newShoppingItemName);
                   Navigator.pop(context);
                 }
               },
-              child: const Text("Add"),
+              child: const Text(
+                "Add",
+                style: TextStyle(fontSize: 20),
+              ),
             ),
           ],
         ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shop_list_app/models/shopping_list.dart';
 import 'package:shop_list_app/providers/shopping_provider.dart';
 import 'package:shop_list_app/screens/add_list_screen.dart';
 import 'package:shop_list_app/screens/shopping_list_screen.dart';
@@ -21,6 +22,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     _loadItems();
   }
 
+  int getCheckedItemCount(ShoppingList shoppingList) {
+    int count = 0;
+    shoppingList.shoppingListItemsMap.values.forEach((item) {
+      if (item.isChecked) {
+        count++;
+      }
+    });
+    return count;
+  }
+
   void _loadItems() async {
     try {
       await ref.read(shoppingProvider.notifier).getAllShoppingLists();
@@ -35,12 +46,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     final shoppingLists = ref.watch(shoppingProvider);
     final shopLists = shoppingLists.values.toList();
-
 
     return Scaffold(
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
@@ -60,21 +69,69 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         itemCount: shoppingLists.length,
         itemBuilder: (context, index) {
           final shoppingList = shopLists[index];
-          return ListTile(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ShoppingListScreen(
-                    shoppingListId: shoppingList.id,
+
+          int checkedItemCount = getCheckedItemCount(shoppingList);
+          return Dismissible(
+            direction: DismissDirection.endToStart,
+            background: Container(
+              color: Colors.red,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: const [
+                  Text(''),
+                  Padding(
+                    padding: EdgeInsets.only(right: 16.0),
+                    child: Icon(
+                      Icons.delete_forever,
+                      color: Colors.white,
+                    ),
                   ),
-                ),
-              );
+                ],
+              ),
+            ),
+            onDismissed: (direction) {
+              ref
+                  .read(shoppingProvider.notifier)
+                  .removeShoppingList(shoppingList.id);
             },
-            trailing: IconButton(onPressed: () {
-              ref.read(shoppingProvider.notifier).removeShoppingList(shoppingList.id);
-            }, icon: const Icon(Icons.delete_forever)),
-            title: Text(shoppingList.name),
+            key: ValueKey(shoppingList.id),
+            child: ListTile(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => ShoppingListScreen(
+                        shoppingListId: shoppingList.id,
+                      ),
+                    ),
+                  );
+                },
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      shoppingList.name,
+                      style: const TextStyle(
+                        fontSize: 24,
+                      ),
+                    ),
+                    Text(
+                      "$checkedItemCount/${shoppingList.shoppingListItemsMap.length}",
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                subtitle: LinearProgressIndicator(
+                  color: Colors.green,
+                  backgroundColor: Colors.grey,
+                  value: checkedItemCount /
+                              (shoppingList.shoppingListItemsMap.isNotEmpty
+                      ? shoppingList.shoppingListItemsMap.length.toDouble()
+                      : 1),
+                )),
           );
         },
       ),

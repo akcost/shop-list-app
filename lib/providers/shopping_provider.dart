@@ -10,17 +10,6 @@ import 'package:http/http.dart' as http;
 class ShoppingNotifier extends StateNotifier<Map<String, ShoppingList>> {
   ShoppingNotifier() : super({});
 
-  void addShoppingList(String newListName) {
-    state = {
-      ...state,
-      newListName: ShoppingList(
-        id: "",
-        name: newListName,
-        shoppingListItemsMap: {},
-      ),
-    };
-  }
-
   Future<void> getAllShoppingLists() async {
     final url = Uri.https(databaseUrl, 'shopping-lists.json');
 
@@ -36,7 +25,6 @@ class ShoppingNotifier extends StateNotifier<Map<String, ShoppingList>> {
       }
 
       final Map<String, dynamic> listData = jsonDecode(response.body);
-      final List<ShoppingList> shoppingLists = [];
       final Map<String, ShoppingList> shoppingListsMap = {};
 
       for (final item in listData.entries) {
@@ -63,7 +51,6 @@ class ShoppingNotifier extends StateNotifier<Map<String, ShoppingList>> {
         }
 
         shoppingListsMap[shoppingList.id] = shoppingList;
-        shoppingLists.add(shoppingList);
       }
 
       state = shoppingListsMap;
@@ -72,11 +59,10 @@ class ShoppingNotifier extends StateNotifier<Map<String, ShoppingList>> {
     }
   }
 
-  Future<void> saveShoppingListItem(
-      String shoppingListId, String name) async {
+  Future<void> saveShoppingListItem(String shoppingListId, String name) async {
     try {
       final url =
-          Uri.https(databaseUrl, 'shopping-lists/$shoppingListId/items.json');
+      Uri.https(databaseUrl, 'shopping-lists/$shoppingListId/items.json');
       final response = await http.post(
         url,
         headers: {
@@ -119,8 +105,39 @@ class ShoppingNotifier extends StateNotifier<Map<String, ShoppingList>> {
     }
   }
 
-  Future<void> removeShoppingListItem(
-      String shoppingListId, String shoppingListItemId) async {
+  Future<void> toggleCheckShoppingListItem(String shoppingListId,
+      ShoppingListItem shoppingListItem) async {
+    final url = Uri.https(databaseUrl,
+        'shopping-lists/$shoppingListId/items/${shoppingListItem
+            .id}.json');
+
+    final response = await http.put(
+      url,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+      'name': shoppingListItem.shoppingItem.name,
+      'isChecked': !shoppingListItem.isChecked,
+      }),
+    );
+
+    if (response.statusCode >= 400) {
+      throw Exception("Failed to fetch data please try again later.");
+    }
+    ShoppingList shoppingList = state[shoppingListId]!;
+    shoppingList.shoppingListItemsMap[shoppingListItem.id]!.isChecked =
+    !shoppingList.shoppingListItemsMap[shoppingListItem.id]!.isChecked;
+
+    state = {
+      ...state,
+      shoppingListId: shoppingList,
+    };
+  }
+
+
+  Future<void> removeShoppingListItem(String shoppingListId,
+      String shoppingListItemId) async {
     final url = Uri.https(databaseUrl,
         'shopping-lists/$shoppingListId/items/$shoppingListItemId.json');
 
@@ -155,7 +172,6 @@ class ShoppingNotifier extends StateNotifier<Map<String, ShoppingList>> {
         },
         body: jsonEncode(
           {
-            'index': state.length,
             'name': newListName,
             'items': [],
           },
@@ -187,7 +203,8 @@ class ShoppingNotifier extends StateNotifier<Map<String, ShoppingList>> {
 
     final response = await http.delete(url);
     if (response.statusCode >= 400) {
-      throw Exception("Failed to remove shopping list, please try again later.");
+      throw Exception(
+          "Failed to remove shopping list, please try again later.");
     }
 
     final updatedState = Map<String, ShoppingList>.from(state);
@@ -198,7 +215,7 @@ class ShoppingNotifier extends StateNotifier<Map<String, ShoppingList>> {
 }
 
 final shoppingProvider =
-    StateNotifierProvider<ShoppingNotifier, Map<String, ShoppingList>>((ref) {
+StateNotifierProvider<ShoppingNotifier, Map<String, ShoppingList>>((ref) {
   final notifier = ShoppingNotifier();
   return notifier;
 });
